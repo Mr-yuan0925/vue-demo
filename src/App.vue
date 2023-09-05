@@ -1,18 +1,39 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <router-view />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import {mapGetters, mapMutations} from "vuex";
+import { USER_INFO} from "@/store/mutation-types";
+import Vue from 'vue'
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
+  computed: {
+    ...mapGetters(['userName','storeObj'])
+  },
+  created(){
+    // 监听浏览器刷新事件，浏览器执行刷新时，刷新之前将vuex中的数据做暂存处理；
+    this.listenersBeforeUnload()
+
+    if(Vue.ls.get(USER_INFO.USER_NAME)){
+      this[USER_INFO.USER_NAME](Vue.ls.get(USER_INFO.USER_NAME))
+    }
+  },
+  beforeDestroy() {
+    window.removeEventListener('beforeunload',this.listenersBeforeUnload,true)
+  },
+  methods: {
+    ...mapMutations([USER_INFO.USER_NAME, USER_INFO.SAVE_OBJECT]),
+    listenersBeforeUnload() {
+      window.addEventListener('beforeunload',()=>{
+        Vue.ls.set(USER_INFO.USER_NAME,this.userName)
+      })
+    }
+  },
+
 }
 </script>
 
@@ -23,6 +44,18 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+nav {
+  padding: 30px;
+}
+
+nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+nav a.router-link-exact-active {
+  color: #42b983;
 }
 </style>
